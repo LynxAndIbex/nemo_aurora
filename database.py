@@ -1,9 +1,8 @@
-import sqlite3
 import json
 from datetime import datetime
 import os
 
-DB_PATH = "aurora_memories.db"
+
 
 def init_database(user_id):
     
@@ -26,6 +25,10 @@ def init_database(user_id):
 
 def save_memory(user_id, title, summary, transcription, tags, emotional_tone, audio_tone=None, memory_data=None):
     file_path = f"{user_id}.json"
+
+    #error handle
+    if not os.path.exists(file_path):
+        init_database(user_id)
 
     with open(file_path, 'r') as f:
         data = json.load(f)
@@ -59,6 +62,10 @@ def save_memory(user_id, title, summary, transcription, tags, emotional_tone, au
 def get_memories(user_id):
 
     file_path = f"{user_id}.json"
+
+    if not os.path.exists(file_path):
+        init_database(user_id)
+
     with open(file_path, 'r') as f:
         data = json.load(f)
 
@@ -105,36 +112,38 @@ def search_memories(user_id,query):
 
     return matches_sorted
 
-def get_recent_memories(limit=5):
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    
-    cursor.execute("SELECT * FROM memories ORDER BY memory_date DESC LIMIT ?", (limit,))
-    rows = cursor.fetchall()
-    conn.close()
-    
-    memories = []
-    for row in rows:
-        memory = {
-            "id": row[0],
-            "title": row[1],
-            "summary": row[2],
-            "tags": json.loads(row[4]) if row[4] else [],
-            "emotional_tone": row[5],
-            "memory_date": row[7]
-        }
-        memories.append(memory)
-    
-    return memories
+def get_recent_memories(user_id, limit=5):
+    memories = get_memories(user_id)
 
-def delete_memory(memory_id):
+    memories_sorted = sorted(
+        memories,
+        key=lambda m: datetime.fromisoformat(m["memory_date"]),
+        reverse=True
+    )
 
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM memories WHERE id = ?", (memory_id,))
-    conn.commit()
-    conn.close()
+    return memories_sorted[:limit]
+
+
+
+def delete_memory(user_id, memory_id):
+    file_path = f"{user_id}.json"
+
+    with open(file_path, 'r') as f:
+        data = json.load(f)
+
+    original_len = len(data["memories"])
+
+    data["memories"] = [
+        m for m in data["memories"] if m["id"] != memory_id
+    ]
+
+    if len(data["memories"]) == original_len:
+        print(f"No memory found with ID {memory_id}")
+        return False
+
+    with open(file_path, 'w') as f:
+        json.dump(data, f, indent=2)
+
     print(f"Memory {memory_id} deleted")
+    return True
 
-if not os.path.exists(DB_PATH):
-    init_database()

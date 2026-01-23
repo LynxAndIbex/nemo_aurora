@@ -13,13 +13,16 @@ def process_query_api(text, user_id):
     
     
     if not text or len(text.strip()) == 0:
-        return None
+        return "Sorry, I'm having trouble right now."
+    
     
     try:
         # searching for memories
         relevant_memories = search_memories(user_id, text)
         memory_context = ""
         
+
+
         if relevant_memories:
             memory_context = "\n\nRelevant memories from past conversations:\n"
             for mem in relevant_memories[:3]:  # Use top 3 relevant memories
@@ -42,8 +45,17 @@ def process_query_api(text, user_id):
 """        
         user_message = text
         if memory_context:
-            user_message = f"{text}{memory_context}"
-        
+            user_message = f"""Question: {text}
+            {memory_context}
+
+        Remember to ONLY answer using the information in the "Past Conversations" section above. If the information isn't there, say "I don't have that information saved yet"."""
+        else:
+            user_message = f"""Question: {text}
+
+        No relevant memories found
+
+        Say: I don't have that information saved yet."""
+            
         payload = {
             "model": "meta-llama/llama-3.2-3b-instruct:free",
             "messages": [
@@ -56,7 +68,7 @@ def process_query_api(text, user_id):
                     "content": user_message
                 }
             ],
-            "max_tokens": 150
+            "temperature": 0.3
         }
         
         response = requests.post(
