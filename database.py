@@ -25,14 +25,14 @@ def init_database(user_id):
 
 
 def save_memory(user_id, title, summary, transcription, tags, emotional_tone, audio_tone=None, memory_data=None):
-    
-    data = {"last_id": 0, "memories": []}
+    file_path = f"{user_id}.json"
 
+    with open(file_path, 'r') as f:
+        data = json.load(f)
+    
     last_id = data.get("last_id", 0)
     new_id = last_id + 1
     data["last_id"] = new_id
-    with open(file_path, 'w') as f:
-        json.dump(data, f, indent=2)
 
 
     #new json library:
@@ -48,75 +48,62 @@ def save_memory(user_id, title, summary, transcription, tags, emotional_tone, au
     "created_at": datetime.now().isoformat()
     }
 
+
     
-    file_path = f"{user_id}.json"
-    if not os.path.exists(file_path):
-        data = {"last id": 0, "memories": []}
-
-
-    with open(file_path, 'r') as f:
-        data = json.load(f)
     data["memories"].append(memory)
 
     with open(file_path, 'w') as f:
         json.dump(data, f, indent=2)
+   
+
+def get_memories(user_id):
+
+    file_path = f"{user_id}.json"
+    with open(file_path, 'r') as f:
+        data = json.load(f)
 
 
-def get_all_memories():
-    """Get all memories, ordered by date"""
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    
-    cursor.execute("SELECT * FROM memories ORDER BY memory_date DESC")
-    rows = cursor.fetchall()
-    conn.close()
-    
-    memories = []
-    for row in rows:
-        memory = {
-            "id": row[0],
-            "title": row[1],
-            "summary": row[2],
-            "transcription": row[3],
-            "tags": json.loads(row[4]) if row[4] else [],
-            "emotional_tone": row[5],
-            "audio_url": row[6],
-            "memory_date": row[7],
-            "created_at": row[8]
-        }
-        memories.append(memory)
-    
-    return memories
 
-def search_memories(query):
-    
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    
-    search_term = f"%{query}%"
-    cursor.execute("""
-        SELECT * FROM memories 
-        WHERE title LIKE ? OR summary LIKE ? OR tags LIKE ? OR transcription LIKE ?
-        ORDER BY memory_date DESC
-    """, (search_term, search_term, search_term, search_term))
-    
-    rows = cursor.fetchall()
-    conn.close()
-    
-    memories = []
-    for row in rows:
-        memory = {
-            "id": row[0],
-            "title": row[1],
-            "summary": row[2],
-            "transcription": row[3],
-            "tags": json.loads(row[4]) if row[4] else [],
-            "emotional_tone": row[5],
-            "memory_date": row[7]
-        }
-        memories.append(memory)
-    
-    return memories
+
+
+
+    return data["memories"]
+
+def search_memories(user_id,query):
+
+    memories = get_memories(user_id)
+    matches = []
+    seen_ids = set() #generate a set to move on and avoid duplicates
+    fields = ["title","summary","transcription","emotional_tone"]
+    query_lower = query.lower()
+
+    for m in memories:
+        found = False #reset if memories are found
+        for f in fields:        
+            field_text = m.get(f, "").lower()
+            if query_lower in field_text:
+                if m["id"] not in seen_ids:
+                    matches.append(m)
+                    seen_ids.add(m["id"])
+                found = True
+                break  # Move to the next memory after a match is found
+       
+        if not found:
+            for t in m.get("tags", []):
+                if query_lower in t.lower():
+                    if m["id"] not in seen_ids:
+                        matches.append(m)
+                        seen_ids.add(m["id"])
+                    break  # Move to the next memory after a match is found
+
+
+    matches_sorted = sorted(
+        matches,
+        key = lambda m: datetime.fromisoformat(m["memory_date"]),
+        reverse=True #only index by newer memories coming first
+    )
+
+    return matches_sorted
 
 def get_recent_memories(limit=5):
     conn = sqlite3.connect(DB_PATH)
