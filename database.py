@@ -5,50 +5,62 @@ import os
 
 DB_PATH = "aurora_memories.db"
 
-def init_database():
+def init_database(user_id):
     
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS memories (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT,
-            summary TEXT,
-            transcription TEXT,
-            tags TEXT,
-            emotional_tone TEXT,
-            audio_url TEXT,
-            memory_date TEXT,
-            created_at TEXT DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
-    
-    conn.commit()
-    conn.close()
-    print(f"Database initialized at {DB_PATH}")
+    file_path = f"{user_id}.json"
 
-def save_memory(title, summary, transcription, tags, emotional_tone, audio_url=None, memory_date=None):
-    """Save a new memory to the database"""
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
+    if not os.path.exists(file_path):
+        data = {
+            "last_id":0,
+            "memories": []
+
+        }
+
+        with open(file_path, 'w') as f:
+            json.dump(data, f, indent=2)
+
+    return file_path
+
+
+
+
+def save_memory(user_id, title, summary, transcription, tags, emotional_tone, audio_tone=None, memory_data=None):
     
-    tags_json = json.dumps(tags) if isinstance(tags, list) else tags
-   
-    if not memory_date:
-        memory_date = datetime.now().strftime("%Y-%m-%d")
+    data = {"last_id": 0, "memories": []}
+
+    last_id = data.get("last_id", 0)
+    new_id = last_id + 1
+    data["last_id"] = new_id
+    with open(file_path, 'w') as f:
+        json.dump(data, f, indent=2)
+
+
+    #new json library:
+    memory = {
+    "id": new_id,
+    "title": title,
+    "summary": summary,
+    "transcription": transcription,
+    "tags": tags,
+    "emotional_tone": emotional_tone,
+    "audio_data": audio_tone,
+    "memory_date": memory_data or datetime.now().isoformat(),
+    "created_at": datetime.now().isoformat()
+    }
+
     
-    cursor.execute("""
-        INSERT INTO memories (title, summary, transcription, tags, emotional_tone, audio_url, memory_date)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (title, summary, transcription, tags_json, emotional_tone, audio_url, memory_date))
-    
-    memory_id = cursor.lastrowid
-    conn.commit()
-    conn.close()
-    
-    print(f"Memory saved with ID: {memory_id}")
-    return memory_id
+    file_path = f"{user_id}.json"
+    if not os.path.exists(file_path):
+        data = {"last id": 0, "memories": []}
+
+
+    with open(file_path, 'r') as f:
+        data = json.load(f)
+    data["memories"].append(memory)
+
+    with open(file_path, 'w') as f:
+        json.dump(data, f, indent=2)
+
 
 def get_all_memories():
     """Get all memories, ordered by date"""
