@@ -31,3 +31,18 @@ storage/
 whisper.cpp/
 
 models/
+
+
+#this is where broken files live:
+broken_assistant.py
+old_wake_word.py
+test_porcupine.py
+samples.py
+train_model.py
+llama.py
+#old wake words
+wake.py
+wake_listener.py
+wake_two.py
+
+
