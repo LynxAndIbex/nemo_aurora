@@ -9,7 +9,7 @@ load_dotenv()
 OPENROUTER_API_KEY = os.getenv("API_KEY") #api key is in .env; not on github.
 
 
-def process_query_api(text):
+def process_query_api(text, user_id):
     
     
     if not text or len(text.strip()) == 0:
@@ -17,23 +17,29 @@ def process_query_api(text):
     
     try:
         # searching for memories
-        relevant_memories = search_memories(text)
+        relevant_memories = search_memories(user_id, text)
         memory_context = ""
         
         if relevant_memories:
             memory_context = "\n\nRelevant memories from past conversations:\n"
             for mem in relevant_memories[:3]:  # Use top 3 relevant memories
-                memory_context += f"- {mem['title']}: {mem['summary']}\n"
+                memory_context += f"- {mem['transcription']}\n"
         
         headers = {
             "Authorization": f"Bearer {OPENROUTER_API_KEY}",
             "Content-Type": "application/json"
         }
         
-        system_prompt = """You are Nemo, a helpful voice assistant running on a Raspberry Pi. 
-Keep responses concise and conversational since they will be spoken aloud. Aim for 1-3 sentences maximum.
-You have access to memories from past conversations - use them to provide personalized responses."""
-        
+        system_prompt = """You are Nemo, a memory voice assistant for someone with Alzheimer's Disease. 
+                        CRITICAL RULES:
+                        1. ONLY answer using information explicitly stated in the "Past Conversations" section below
+                        2. If the information isn't in past conversations, say "I don't have that information saved yet"
+                        3. NEVER guess or make up information
+                        4. Keep responses brief (1-2 sentences) but ACCURATE.
+                        5. If responses require more than 2 sentences to be accurate, use more than 2 sentences. Express the idea as quickly as possible without being inaccurate.
+                        When asking, think: "Is this EXACTLY what was said in past conversations, or am I guessing?". Do not guess. If you do not have that info, reply with "I don't have that information yet".
+
+"""        
         user_message = text
         if memory_context:
             user_message = f"{text}{memory_context}"
