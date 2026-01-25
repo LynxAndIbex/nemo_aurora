@@ -57,6 +57,8 @@ def save_memory(user_id, title, summary, transcription, tags, emotional_tone, au
 
     with open(file_path, 'w') as f:
         json.dump(data, f, indent=2)
+
+        return new_id               
    
 
 def get_memories(user_id):

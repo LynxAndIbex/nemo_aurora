@@ -48,7 +48,7 @@ def main():
            print(f"[You said: {transcript}]")
   
            print("[Processing...]") 
-           response = process_query(transcript, user_id)
+           response = process_query_api(transcript, user_id)
            print(f"[Nemo: {response}]")
 
         

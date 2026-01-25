@@ -3,7 +3,7 @@ import json
 import os
 from datetime import datetime
 from database import save_memory
-from chatbot import user_id
+
 
 OPENROUTER_API_KEY = os.getenv("API_KEY")
 
@@ -85,7 +85,7 @@ Return JSON like:
         return None
 
 
-def create_memory_from_conversation(user_query, assistant_response, audio_file=None):
+def create_memory_from_conversation(user_query, assistant_response, user_id, audio_file=None):
 
     
     transcript = f"User asked: {user_query}\nAssistant responded: {assistant_response}"
@@ -98,6 +98,7 @@ def create_memory_from_conversation(user_query, assistant_response, audio_file=N
         return None
     
     memory_id = save_memory(
+        user_id=user_id,
         title=metadata.get("title", "Untitled Memory"),
         summary=metadata.get("summary", ""),
         transcription=transcript,
