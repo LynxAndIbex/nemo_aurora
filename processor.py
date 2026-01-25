@@ -3,13 +3,11 @@ import json
 import os
 from datetime import datetime
 from database import save_memory
+from chatbot import user_id
 
 OPENROUTER_API_KEY = os.getenv("API_KEY")
 
 
-#I ran into a huge problem here because JSON parsing from the AI was failing due to extra text.
-#So now I made the AI ONLY return JSON
-#I learned parsing logic from GPT.
 def process_memory(transcript, audio_file=None):
     
     if not transcript or len(transcript.strip()) == 0:
@@ -87,8 +85,6 @@ Return JSON like:
         return None
 
 
-#I named like ten other variables 'create memory' while debugging this, which is why the name is so long
-#definitely a future cleanup item on the list
 def create_memory_from_conversation(user_query, assistant_response, audio_file=None):
 
     

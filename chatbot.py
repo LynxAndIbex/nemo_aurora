@@ -1,11 +1,12 @@
 
 import time
-from nemo import start_recording, stop_recording #from nemo.py, the wake word engine
+from nemo import start_recording, stop_recording, is_detected
 from speech_to_text import transcribe_audio
-from assistant import process_query
+from assistant import process_query_api
 from text_to_speech import speak_text
 
 def main():
+    user_id = "user_123" #sample user ID
     print("=" * 50) #top barrier
     print("Nemo Starting...") 
     print("=" * 50) 
@@ -16,11 +17,10 @@ def main():
            #listen for wake word
            print("\n[Listening for my name...]")
            start_recording()
-           while True:
+           
+           while not is_detected():
                time.sleep(0.1)
-               wake_audio = stop_recording()
-               if wake_audio:
-                   break
+           wake_audio = stop_recording()
 
            print("[Wake word detected!]")
  
@@ -48,7 +48,7 @@ def main():
            print(f"[You said: {transcript}]")
   
            print("[Processing...]") 
-           response = process_query(transcript)
+           response = process_query(transcript, user_id)
            print(f"[Nemo: {response}]")
 
         
@@ -57,7 +57,7 @@ def main():
            from processor import create_memory_from_conversation
 
            try:
-               create_memory_from_conversation(transcript, response, audio_file)
+               create_memory_from_conversation(transcript, response, audio_file, user_id)
            except Exception as e:
                print(f"Failed to save memory: {e}")
           

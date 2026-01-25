@@ -112,7 +112,11 @@ class WakeWordEngine:
         self._stop_flag.set()
         if self._thread is not None:
             self._thread.join(timeout=2.0)
-        return self.filename
+
+        if self.detected:
+            return self.filename
+        else:
+            return None
     
     def __del__(self):
     
@@ -134,6 +138,9 @@ def start_recording():
 
 def stop_recording():
     return engine.stop_recording()
+
+def is_detected():
+    return engine.detected
 
 
 if __name__ == "__main__":
