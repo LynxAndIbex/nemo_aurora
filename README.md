@@ -13,3 +13,12 @@ This submission is the first finished iteration of Nemo. Future work on this pro
 
 
 Thank you for your consideration! 
+
+-----
+
+TO MIT Reviewer: This is the dev branch! I'm working on the next iteration for proper global release of Nemo/Aurora here. The submitted components of the portfolio were on the main branch. However, feel free to look around if you're just curious. 
+
+To everyone else: This branch is the most recent version. If you have any suggestions or improvements, you can reach me on Discord at: rish__.
+or Instagram at: @atx.rishabh
+
+I appreciate the community's help so far. Thanks y'all.
