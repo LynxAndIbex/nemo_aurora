@@ -1,13 +1,19 @@
-from fastapi import FastAPI, UploadFile, Form
+from fastapi import FastAPI, UploadFile, Form, BackgroundTasks
 from fastapi.responses import FileResponse
 import uvicorn
 import os
+import asyncio
 from dotenv import load_dotenv
 load_dotenv()
 from wake_word import start_recording, stop_recording
 from speech_to_text import transcribe_audio
 from assistant import process_query
 from text_to_speech import speak_text
+from concurrent.futures import ThreadPoolExecutor
+
+executor = ThreadPoolExecutor()
+
+
 
 STORAGE_DIR = "storage"
 os.makedirs(STORAGE_DIR, exist_ok=True)
@@ -29,18 +35,21 @@ async def transcribe_endpoint(file: UploadFile):
    
     filepath = os.path.join(STORAGE_DIR, file.filename)
     with open(filepath, "wb") as f:
-        f.write(await file.read())
-    transcript = transcribe_audio(filepath)
+        while chunk := file.read(1024 * 1024): #1 megabyte
+            f.write(chunk)
+    transcript = await asyncio.get_event_loop().run_in_executor(executor, transcribe_audio, filepath)
+    os.remove(filepath)
     return {"transcript": transcript}
 @app.post("/ask")
 async def ask_endpoint(text: str = Form(...)):
-    response = process_query(text)
+    response = await asyncio.get_event_loop().run_in_executor(executor, process_query, text)
     return {"answer": response}
 
 @app.post("/speak")
-async def speak_endpoint(text: str = Form(...)):
+async def speak_endpoint(background_tasks: BackgroundTasks, text: str = Form(...)):
     # Generate TTS audio and return file
     audio_file = speak_text(text, output_dir=STORAGE_DIR)
+    background_tasks.add_task(os.remove, audio_file)
     return FileResponse(audio_file, media_type="audio/wav")
 
 @app.get("/status")
