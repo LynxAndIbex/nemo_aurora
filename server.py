@@ -12,7 +12,7 @@ from text_to_speech import speak_text
 from concurrent.futures import ThreadPoolExecutor
 
 executor = ThreadPoolExecutor()
-
+#new server using uvicorn
 
 
 STORAGE_DIR = "storage"
