@@ -1,0 +1,11 @@
+numpy
+scipy
+sounddevice
+pvporcupine
+fastapi
+uvicorn
+transformers
+torch
+sentencepiece
+python-dotenv
+requests
