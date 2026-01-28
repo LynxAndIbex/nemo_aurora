@@ -9,6 +9,8 @@ venv/
 .env
 .env.*
 
+piper/
+
 *.db
 *.sqlite3
 

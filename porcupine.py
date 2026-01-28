@@ -75,3 +75,4 @@ def record_audio(duration):
 
 if __name__ == "__main__":
     detect_wake_word()
+

@@ -5,7 +5,7 @@ import os
 import asyncio
 from dotenv import load_dotenv
 load_dotenv()
-from wake_word import start_recording, stop_recording
+from porcupine import start_recording, stop_recording
 from speech_to_text import transcribe_audio
 from assistant import process_query
 from text_to_speech import speak_text
