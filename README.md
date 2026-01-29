@@ -1,4 +1,4 @@
-### Welcome to Aurora/Nemo!
+# Welcome to Aurora/Nemo!
 
 A local AI assistant project built in Python using TTS, STT, and memory logging.
 
@@ -16,7 +16,7 @@ The wake-word engine will not work when ran from a computer. It is a downloaded 
 
 Please use a Raspberry Pi when running it.
 
-# Suggested Hardware
+### Suggested Hardware
 
 For this project, I strongly suggest the following capable hardware:
 
@@ -28,11 +28,11 @@ For this project, I strongly suggest the following capable hardware:
 
 -A microphone for inputs. Ideally, your headphones can both record and hear. Again, this needs to be either 16000 or 41000. 
 
-# System Requirements
+### System Requirements
 
 -The second iteration of the repository ( updated `Jan 20th ` ) does not require a heavy system to run. Resources are cleared. 
 
-# Deployment Instructions
+### Deployment Instructions
 
 -Some basic things if you've never done this sort of thing before:
 
@@ -43,9 +43,9 @@ For this project, I strongly suggest the following capable hardware:
 5) install the requirements file, which has recently been updated in v2 `pip install -r requirements.txt`
 6) now you should be good to run the project locally. 
 
-# Notes on publication
+### Notes on publication
 
 This project is open source MIT licensed. Retextures and changes in modular flow most be documented and credit appropriately. 
-
+Project developed by Rishabh Acharya
 
 README last updated on: `January 29, 2026`
